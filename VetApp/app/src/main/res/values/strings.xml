@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">VetApp</string>
+    <string name="welcome">"Welcome !"</string>
+    <string-array name="userType">
+        <item>Livestock Owner</item>
+        <item>Veterinarian</item>
+    </string-array>
+    <string name="title_activity_view_animals">ViewAnimals</string>
+    <string name="noAnimals"> "There are no animals registered yet."</string>
+    <string name="noSubmittedCases">"There are currently no submitted cases. Cases can be submitted in the View Animals tab."</string>
+    <string name="noResolvedCases">"There are currently no resolved cases. Thank you for your patience."</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+</resources>
