@@ -22,6 +22,10 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.225" />
 
+    <!--TODO: Question
+        Should we store the choice of vet or farmer since the user of this app probably isn't
+        going to use both interfaces? This idea can cause a problem if someone accidentally selects
+        the wrong option though so I'm not sure-->
     <Button
         android:id="@+id/button2"
         android:layout_width="197dp"

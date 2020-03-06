@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity{
     private Button buttonToFarm;
+    private Button buttonToVet;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -27,6 +28,19 @@ public class MainActivity extends AppCompatActivity{
                 openFarmView();
             }
         });
+
+        buttonToVet = (Button) findViewById(R.id.button2);
+        buttonToVet.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openVetView();
+            }
+        });
+    }
+
+    public void openVetView(){
+        Intent intent = new Intent(this, VetView.class);
+        startActivity(intent);
     }
 
     public void openFarmView(){
