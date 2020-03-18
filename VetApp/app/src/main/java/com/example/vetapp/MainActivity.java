@@ -39,11 +39,13 @@ public class MainActivity extends AppCompatActivity{
     }
 
     public void openVetView(){
+        //TODO: Database writing here
         Intent intent = new Intent(this, VetView.class);
         startActivity(intent);
     }
 
     public void openFarmView(){
+        //TODO: Database writing here
         Intent intent = new Intent(this, FarmView.class);
         startActivity(intent);
     }
