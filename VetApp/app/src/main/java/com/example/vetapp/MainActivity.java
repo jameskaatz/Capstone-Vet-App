@@ -48,6 +48,8 @@ public class MainActivity extends AppCompatActivity{
             public void onClick(View v) {
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                 if(user != null) {
+                    //if the user is logged in only a new user would get to this point
+                    //so we write new user data to the database
                     writeNewUser(user.getUid(),
                                  displayName.getText().toString(),
                                  user.getPhoneNumber(),
@@ -64,6 +66,8 @@ public class MainActivity extends AppCompatActivity{
             public void onClick(View v) {
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                 if(user != null) {
+                    //if the user is logged in only a new user would get to this point
+                    //so we write new user data to the database
                     writeNewUser(user.getUid(),
                             displayName.getText().toString(),
                             user.getPhoneNumber(),
@@ -76,18 +80,22 @@ public class MainActivity extends AppCompatActivity{
     }
 
     public void openVetView(){
+        //start up VetView activity
         Intent intent = new Intent(this, VetView.class);
         startActivity(intent);
     }
 
     public void openFarmView(){
+        //start up FarmView activity
         Intent intent = new Intent(this, FarmView.class);
         startActivity(intent);
     }
 
     public void writeNewUser(String uid, String name, String phone, String email, boolean farmer) {
+        //create user object
         User user = new User(uid, name, phone, email, farmer);
 
+        //write user object to the database
         mDatabase.child("users").child(uid).setValue(user)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override

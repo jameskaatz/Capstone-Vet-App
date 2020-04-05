@@ -51,6 +51,7 @@ public class LoginActivity extends AppCompatActivity {
             dbRef.addListenerForSingleValueEvent(new ValueEventListener(){
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    //change view based on received data
                     User user = dataSnapshot.getValue(User.class);
                     changeUserView(user);
                 }
@@ -58,11 +59,6 @@ public class LoginActivity extends AppCompatActivity {
                 @Override
                 public void onCancelled(@NonNull DatabaseError databaseError) { Log.d("AUTH", "User database read cancelled."); }
             });
-            /*///but for debugging log out
-            FirebaseAuth.getInstance().signOut();
-            Intent intent = new Intent(this, LoginActivity.class);
-            startActivity(intent);
-            finish();/**/
         } else {
             Log.d("AUTH", "User not logged in.");
             //do nothing here
@@ -113,6 +109,7 @@ public class LoginActivity extends AppCompatActivity {
                     dbRef.addListenerForSingleValueEvent(new ValueEventListener(){
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            //change view based on the received data
                             User user = dataSnapshot.getValue(User.class);
                             changeUserView(user);
                         }
@@ -122,12 +119,13 @@ public class LoginActivity extends AppCompatActivity {
                     });
                 }
             } else {
-                //sign in failed
+                //sign in failed because request was cancelled
                 if(response == null) {
                     Log.d("AUTH", "Sign-In Cancelled.");
                     return;
                 }
 
+                //sign in failed because there was no network connection
                 if(response.getError().getErrorCode() == ErrorCodes.NO_NETWORK) {
                     Log.d("AUTH", "No Internet Connection.");
                     return;
@@ -140,21 +138,36 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    //changes the view based on the passed in user object
     public void changeUserView(User user) {
-        if(user != null) {
+        //check if user is null
+        if(user != null && FirebaseAuth.getInstance().getCurrentUser() != null) {
             Log.d("AUTH", "User <" + user.getUid() + "> " + FirebaseAuth.getInstance().getCurrentUser().getUid());
             if(user.getFarmer()) {
                 //go to farmer view
-                startActivity(new Intent(this, FarmView.class));
+                Intent intent = new Intent(this, FarmView.class);
+
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("Current User", user);
+                intent.putExtras(bundle);
+
+                startActivity(intent);
                 finish();
             } else {
                 //go to vet view
-                startActivity(new Intent(this, VetView.class));
+                Intent intent = new Intent(this, VetView.class);
+
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("Current User", user);
+                intent.putExtras(bundle);
+
+                startActivity(intent);
                 finish();
             }
         } else {
+            //problem finding authenticated user in database
             Log.d("AUTH", "ERROR: user not found <" + FirebaseAuth.getInstance().getCurrentUser().getUid() + ">" );
-            FirebaseAuth.getInstance().signOut();
+            FirebaseAuth.getInstance().signOut(); //make sure the problematic authenticated user is signed out
         }
     }
 }

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.example.vetapp.VetView">
+
+    <item
+        android:id="@+id/menu_search"
+        android:title="Add Contact"
+        app:showAsAction="never"/> <!-- Add an icon and change this value to "always" to have the option outside of the triple dot menu-->
+
+    <item
+        android:id="@+id/menu_logout"
+        android:title="Logout"
+        app:showAsAction="never"/>
+</menu>

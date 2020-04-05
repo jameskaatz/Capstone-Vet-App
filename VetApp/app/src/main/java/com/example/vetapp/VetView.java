@@ -1,95 +1,144 @@
 package com.example.vetapp;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NavUtils;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.Activity;
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
-import android.telephony.SmsManager;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.concurrent.CountDownLatch;
 
 public class VetView extends AppCompatActivity {
 
-    private Button buttonSend;
-    private EditText textMessage;
-    private EditText phoneNumber;
-    private IntentFilter intentFilter;
+    private Button createConvoBtn;
 
-    private BroadcastReceiver intentReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            //push the new text message into the message list
-            //Log.d("GOT HERE", "intent receiver received intent");
-            //Log.d("MESSAGE RECEIVED", "Received: \"" + intent.getExtras().getString("message") + "\"");
+    private User currentUser;
 
-            //TODO: message received here (needed for conversation implementation)
-            TextView messages = (TextView) findViewById(R.id.message);
-            messages.setText(intent.getExtras().getString("message"));
-        }
-    };
+    private RecyclerView convoList;
+    private RecyclerView.Adapter convoListAdapter;
+    private RecyclerView.LayoutManager convoListLayoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_vet_view);
 
-        //set up intent filter
-        intentFilter = new IntentFilter();
-        intentFilter.addAction("SMS_RECEIVED_ACTION");
+        //get the current user from the data base
+        Intent intent = getIntent();
+        Bundle bundle = intent.getExtras();
+        currentUser = (User) bundle.getSerializable("Current User");
 
-        buttonSend = (Button) findViewById(R.id.buttonSend);
-        textMessage = (EditText) findViewById(R.id.textMessage);
-        phoneNumber = (EditText) findViewById(R.id.phoneNumber);
+        //get conversations
+        ArrayList<String> conversationIds = currentUser.getConversationList();
+        final ArrayList<Conversation> conversationList = new ArrayList<Conversation>();
+        final CountDownLatch gotConvos = new CountDownLatch(conversationIds.size());
+        for(String conversationId : conversationIds) {
+            DatabaseReference ref = FirebaseDatabase.getInstance().getReference("/conversations/" + conversationId);
+            ref.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    conversationList.add(dataSnapshot.getValue(Conversation.class));
+                    gotConvos.countDown();
+                }
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) { Log.d("Vet View", "Conversation query cancelled."); }
+            });
+        }
 
-        buttonSend.setOnClickListener(new View.OnClickListener() {
+        try {
+            gotConvos.await(); //wait until firebase responds with all of the conversations
+        } catch(InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        createConvoBtn = findViewById(R.id.new_message);
+        createConvoBtn.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                //this check is just in case something weird happens but I don't think is needed
-                if(textMessage.getText() != null && phoneNumber.getText() != null) {
-                    String message = textMessage.getText().toString();
-                    String number = phoneNumber.getText().toString();
-
-                    //TODO: message sent here (needed for conversation implementation)
-                    sendMessage(number, message);
-                }
+                goToNewConversationActivity(currentUser);
             }
         });
 
+        initializeRecyclerView(conversationList, currentUser);
     }
 
-    protected void sendMessage(String phone, String message) {
-        //check to see if we have a phone number and a message to actually send
-        if(phone.equals("") || message.equals("")) {
-            return; //don't do anything
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_vet_view, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        //handle presses on the action bar items
+        switch(item.getItemId()) {
+            //this is essentially a "back" button that returns to the parent activity set in the manifest
+            case android.R.id.home:
+                NavUtils.navigateUpFromSameTask(this);
+                return true;
+
+            //logout option
+            case R.id.menu_logout:
+                FirebaseAuth.getInstance().signOut();
+                goToLoginActivity();
+                return true;
+
+            //add contact option
+            case R.id.menu_search:
+                goToAddContactActivity();
+                return true;
         }
-        String SENT = "Message Sent";
-        String DELIVERED = "Message Delivered";
 
-        PendingIntent piSent = PendingIntent.getBroadcast(this, 0, new Intent(SENT), 0);
-        PendingIntent piDelivered = PendingIntent.getBroadcast(this, 0, new Intent(DELIVERED), 0);
-
-        SmsManager sms = SmsManager.getDefault();
-        sms.sendTextMessage(phone, null, message, piSent, piDelivered);
+        return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    protected void onResume(){
-        registerReceiver(intentReceiver, intentFilter);
-        super.onResume();
+    private void goToLoginActivity() { startActivity(new Intent(this, LoginActivity.class)); }
+    private void goToAddContactActivity(){
+        Intent intent = new Intent(this, AddContactActivity.class);
+
+        //pass user into next activity
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("Current User", currentUser);
+        intent.putExtras(bundle);
+
+        startActivity(intent);
+    }
+    private void goToNewConversationActivity(User user){
+        Intent intent = new Intent(this, NewConversationActivity.class);
+
+        //pass user into next activity
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("Current User", user);
+        intent.putExtras(bundle);
+
+        Log.d("Vet View", "Going into new conversation activity");
+        startActivity(intent);
     }
 
-    @Override
-    protected void onPause(){
-        unregisterReceiver(intentReceiver);
-        super.onPause();
-    }
+    private void initializeRecyclerView(ArrayList<Conversation> conversations, User me) {
+        convoList = findViewById(R.id.convoList);
+        convoList.setNestedScrollingEnabled(false);
+        convoList.setHasFixedSize(false);
+        convoListLayoutManager = new LinearLayoutManager(getApplicationContext(), RecyclerView.VERTICAL, false);
+        convoList.setLayoutManager(convoListLayoutManager);
 
+        convoListAdapter = new ConversationListAdapter(conversations, me);
+        convoList.setAdapter(convoListAdapter);
+    }
 }
