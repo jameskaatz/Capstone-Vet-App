@@ -29,6 +29,7 @@ public class VetView extends AppCompatActivity {
     private Button createConvoBtn;
 
     private User currentUser;
+    private ArrayList<Conversation> conversations;
 
     private RecyclerView convoList;
     private RecyclerView.Adapter convoListAdapter;
@@ -39,33 +40,10 @@ public class VetView extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_vet_view);
 
-        //get the current user from the data base
+        //get the current user from the intent
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
         currentUser = (User) bundle.getSerializable("Current User");
-
-        //get conversations
-        ArrayList<String> conversationIds = currentUser.getConversationList();
-        final ArrayList<Conversation> conversationList = new ArrayList<Conversation>();
-        final CountDownLatch gotConvos = new CountDownLatch(conversationIds.size());
-        for(String conversationId : conversationIds) {
-            DatabaseReference ref = FirebaseDatabase.getInstance().getReference("/conversations/" + conversationId);
-            ref.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    conversationList.add(dataSnapshot.getValue(Conversation.class));
-                    gotConvos.countDown();
-                }
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) { Log.d("Vet View", "Conversation query cancelled."); }
-            });
-        }
-
-        try {
-            gotConvos.await(); //wait until firebase responds with all of the conversations
-        } catch(InterruptedException e) {
-            e.printStackTrace();
-        }
 
         createConvoBtn = findViewById(R.id.new_message);
         createConvoBtn.setOnClickListener(new View.OnClickListener(){
@@ -75,7 +53,27 @@ public class VetView extends AppCompatActivity {
             }
         });
 
-        initializeRecyclerView(conversationList, currentUser);
+        final ArrayList<String> conversationIds = currentUser.getConversationList();
+        conversations = new ArrayList<Conversation>();
+
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("/conversations");
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for(DataSnapshot ds : dataSnapshot.getChildren()) {
+                    Conversation c = ds.getValue(Conversation.class);
+                    if(conversationIds.contains(c.getUid())){
+                        Log.d("Get Conversations", "Found Conversation : " + c.getUid());
+                        conversations.add(c);
+                    }
+                }
+                initializeRecyclerView(conversations, currentUser);
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.d("Conversations", "Conversation query cancelled.");
+            }
+        });
     }
 
     @Override
@@ -138,7 +136,11 @@ public class VetView extends AppCompatActivity {
         convoListLayoutManager = new LinearLayoutManager(getApplicationContext(), RecyclerView.VERTICAL, false);
         convoList.setLayoutManager(convoListLayoutManager);
 
-        convoListAdapter = new ConversationListAdapter(conversations, me);
+        convoListAdapter = new ConversationListAdapter(conversations, me, this);
         convoList.setAdapter(convoListAdapter);
     }
+
+    //TODO add listeners to always listen for messages and conversations updates
+    //  listener on the user's conversation list
+    //  listener on all of the user's conversations << maybe this one is generated in ConversationListAdapter
 }

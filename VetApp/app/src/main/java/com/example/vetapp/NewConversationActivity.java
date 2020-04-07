@@ -102,7 +102,7 @@ public class NewConversationActivity extends AppCompatActivity {
         contactListLayoutManager = new LinearLayoutManager(getApplicationContext(), RecyclerView.VERTICAL, false);
         contactList.setLayoutManager(contactListLayoutManager);
 
-        contactListAdapter = new ContactListAdapter(contacts, user);
+        contactListAdapter = new ContactListAdapter(contacts, user, this);
         contactList.setAdapter(contactListAdapter);
     }
 }

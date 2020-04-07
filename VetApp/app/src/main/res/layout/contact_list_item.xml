@@ -4,7 +4,7 @@
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/conversationItem">
+    android:id="@+id/wholeItem">
 
     <TextView
         android:layout_width="0dp"
@@ -13,11 +13,21 @@
         android:text="name"
         android:id="@+id/name"/>
 
-    <TextView
+    <LinearLayout
         android:layout_width="0dp"
-        android:layout_weight="1"
         android:layout_height="wrap_content"
-        android:text="message shows"
-        android:id="@+id/preview"/>
+        android:layout_weight="2"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="phone"
+            android:id="@+id/phone"/>
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="email"
+            android:id="@+id/email"/>
+    </LinearLayout>
 </LinearLayout>

@@ -50,12 +50,12 @@ public class MainActivity extends AppCompatActivity{
                 if(user != null) {
                     //if the user is logged in only a new user would get to this point
                     //so we write new user data to the database
-                    writeNewUser(user.getUid(),
-                                 displayName.getText().toString(),
-                                 user.getPhoneNumber(),
-                                 user.getEmail(),
-                                 true);
-                    openFarmView();
+                    User newUser = writeNewUser(user.getUid(),
+                                        displayName.getText().toString(),
+                                        user.getPhoneNumber(),
+                                        user.getEmail(),
+                                        true);
+                    openFarmView(newUser);
                 }
             }
         });
@@ -68,30 +68,42 @@ public class MainActivity extends AppCompatActivity{
                 if(user != null) {
                     //if the user is logged in only a new user would get to this point
                     //so we write new user data to the database
-                    writeNewUser(user.getUid(),
-                            displayName.getText().toString(),
-                            user.getPhoneNumber(),
-                            user.getEmail(),
-                            false);
-                    openVetView();
+                    User newUser = writeNewUser(user.getUid(),
+                                    displayName.getText().toString(),
+                                    user.getPhoneNumber(),
+                                    user.getEmail(),
+                                    false);
+                    openVetView(newUser);
                 }
             }
         });
     }
 
-    public void openVetView(){
+    public void openVetView(User user){
         //start up VetView activity
         Intent intent = new Intent(this, VetView.class);
+
+        //pass user into next activity
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("Current User", user);
+        intent.putExtras(bundle);
+
         startActivity(intent);
     }
 
-    public void openFarmView(){
+    public void openFarmView(User user){
         //start up FarmView activity
         Intent intent = new Intent(this, FarmView.class);
+
+        //pass user into next activity
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("Current User", user);
+        intent.putExtras(bundle);
+
         startActivity(intent);
     }
 
-    public void writeNewUser(String uid, String name, String phone, String email, boolean farmer) {
+    public User writeNewUser(String uid, String name, String phone, String email, boolean farmer) {
         //create user object
         User user = new User(uid, name, phone, email, farmer);
 
@@ -101,6 +113,7 @@ public class MainActivity extends AppCompatActivity{
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d("AUTH", "User data written to database.");
+                        //TODO should we return the user here to make sure its in the database
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -110,5 +123,7 @@ public class MainActivity extends AppCompatActivity{
                         Log.d("AUTH", e.getMessage());
                     }
                 });
+
+        return user;
     }
 }

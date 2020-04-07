@@ -1,10 +1,14 @@
 package com.example.vetapp;
 
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -28,10 +32,12 @@ class ConversationListAdapter extends androidx.recyclerview.widget.RecyclerView.
     private ArrayList<Conversation> convoList;
     private User me;
     private DatabaseReference dbRef;
+    private Context parentContext;
 
-    public ConversationListAdapter(ArrayList<Conversation> conversations, User user) {
+    public ConversationListAdapter(ArrayList<Conversation> conversations, User user, Context packageContext) {
         convoList = conversations;
         me = user;
+        parentContext = packageContext;
     }
 
     @NonNull
@@ -58,6 +64,7 @@ class ConversationListAdapter extends androidx.recyclerview.widget.RecyclerView.
         }
 
         holder.memberA = me; //always make member A the current logged in user
+        holder.conversation = convo;
 
         //grab the user from the conversation
         dbRef.addListenerForSingleValueEvent(new ValueEventListener(){
@@ -69,11 +76,29 @@ class ConversationListAdapter extends androidx.recyclerview.widget.RecyclerView.
                 holder.name.setText(user.getUid());
             }
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) { Log.d("Binding Conversations", "Convesation member search cancelled"); }
+            public void onCancelled(@NonNull DatabaseError databaseError) { Log.d("Binding Conversations", "Conversation member search cancelled"); }
         });
 
         //grab the latest message for the message preview
-        holder.messagePreview.setText("Implement message preview");
+        String messageUid = convo.getLatestMessage();
+        if(messageUid == null) {
+            holder.messagePreview.setText("No messages.");
+        } else {
+            DatabaseReference lmref = FirebaseDatabase.getInstance().getReference("/messages/" + messageUid);
+            lmref.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    Message message = dataSnapshot.getValue(Message.class);
+                    holder.messagePreview.setText(message.getContent());
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) { Log.d("Binding Conversations", "Message preview request cancelled."); }
+            });
+        }
+        //TODO attach listeners in here
+        //make sure all listeners are detached
+        //then attach the appropriate listener
     }
 
     @Override
@@ -85,14 +110,33 @@ class ConversationListAdapter extends androidx.recyclerview.widget.RecyclerView.
     {
         public User memberA;
         public User memberB;
+        public Conversation conversation;
         public TextView name;
         public TextView messagePreview;
+        public LinearLayout wholeItem;
 
         public ConversationListViewHolder(View view)
         {
             super(view);
             name = view.findViewById(R.id.name);
             messagePreview = view.findViewById(R.id.preview);
+            wholeItem = view.findViewById(R.id.conversationItem);
+            wholeItem.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(parentContext, ConversationActivity.class);
+
+                    //pass user, other user, and conversation into next activity
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable("Current User", memberA);
+                    bundle.putSerializable("Other User", memberB);
+                    bundle.putSerializable("Conversation", conversation);
+                    //TODO maybe pass in parentContext here in order to return to the right place?? idk if itll work
+                    intent.putExtras(bundle);
+
+                    parentContext.startActivity(intent);
+                }
+            });
         }
     }
 }
