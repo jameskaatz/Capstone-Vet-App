@@ -1,6 +1,7 @@
 package com.example.vetapp;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -14,6 +15,7 @@ import android.widget.EditText;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -31,6 +33,8 @@ public class ConversationActivity extends AppCompatActivity {
     private User otherUser;
     private Conversation conversation;
     private ArrayList<Message> messages;
+
+    private DatabaseReference convoRef;
 
     private Button sendButton;
     private EditText messageText;
@@ -50,6 +54,40 @@ public class ConversationActivity extends AppCompatActivity {
         currentUser = (User) bundle.getSerializable("Current User");
         otherUser = (User) bundle.getSerializable("Other User");
         conversation = (Conversation) bundle.getSerializable("Conversation");
+
+        //event listener to continue listening for updates to this conversation
+        convoRef = FirebaseDatabase.getInstance().getReference("/conversations/" + conversation.getUid() + "/messages");
+        convoRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                //the data snapshot here is the id of the message added to the conversation
+                String messageId = dataSnapshot.getValue(String.class);
+                //if this message id is already in the the conversation messages list then it was a message that we sent
+                if(!conversation.getMessages().contains(messageId)) {
+                    DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("/messages/" + messageId);
+                    mRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            Message newMessage = dataSnapshot.getValue(Message.class);
+                            conversation.addMessage(newMessage.getUid());
+                            messages.add(newMessage);
+                            //update the recycler view
+                            messageListAdapter.notifyDataSetChanged();
+                        }
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) { Log.d("Conversation", "New message query was cancelled."); }
+                    });
+                }
+            }
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) { }
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) { }
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) { }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) { Log.d("Conversation", "Get changed messages query cancelled."); }
+        });
 
         //gather messages and init recycler view
         final ArrayList<String> messageIds = conversation.getMessages();
@@ -125,7 +163,7 @@ public class ConversationActivity extends AppCompatActivity {
                         .addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
-                                Log.d("Conversation", "Convesation data failed to write to database");
+                                Log.d("Conversation", "Conversation data failed to write to database");
                                 Log.d("Conversation", e.getMessage());
                             }
                         });
@@ -194,4 +232,7 @@ public class ConversationActivity extends AppCompatActivity {
     //  I think this can be done by making a menu and on the back option just start a new activity of parentContext
     //  We also have the current user here
     //  but we want to change the parent view so the regular "back" button on android phones works correctly
+    //these go hand in hand
+    //TODO create menu for the conversation view so we can do the animal stuff
+    //  also show name of other person in conversation in the menu bar
 }

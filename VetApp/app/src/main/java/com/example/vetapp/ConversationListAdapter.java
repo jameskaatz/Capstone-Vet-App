@@ -12,11 +12,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -96,9 +98,7 @@ class ConversationListAdapter extends androidx.recyclerview.widget.RecyclerView.
                 public void onCancelled(@NonNull DatabaseError databaseError) { Log.d("Binding Conversations", "Message preview request cancelled."); }
             });
         }
-        //TODO attach listeners in here
-        //make sure all listeners are detached
-        //then attach the appropriate listener
+        holder.startConvoListener();
     }
 
     @Override
@@ -111,6 +111,8 @@ class ConversationListAdapter extends androidx.recyclerview.widget.RecyclerView.
         public User memberA;
         public User memberB;
         public Conversation conversation;
+        public DatabaseReference convoRef;
+
         public TextView name;
         public TextView messagePreview;
         public LinearLayout wholeItem;
@@ -136,6 +138,35 @@ class ConversationListAdapter extends androidx.recyclerview.widget.RecyclerView.
 
                     parentContext.startActivity(intent);
                 }
+            });
+        }
+
+        public void startConvoListener()
+        {
+            convoRef = FirebaseDatabase.getInstance().getReference("/conversations/" + conversation.getUid() + "/messages");
+            convoRef.addChildEventListener(new ChildEventListener(){
+                @Override
+                public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                    String messageId = dataSnapshot.getValue(String.class);
+                    DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("/messages/" + messageId);
+                    mRef.addListenerForSingleValueEvent(new ValueEventListener(){
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            Message latest = dataSnapshot.getValue(Message.class);
+                            messagePreview.setText(latest.getContent());
+                        }
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) { Log.d("Conversation List", "Receive latest message cancelled."); }
+                    });
+                }
+                @Override
+                public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {}
+                @Override
+                public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {}
+                @Override
+                public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {}
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) { Log.d("Conversation List", "Receive latest message id cancelled."); }
             });
         }
     }

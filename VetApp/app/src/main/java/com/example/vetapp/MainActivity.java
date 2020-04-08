@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity{
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d("AUTH", "User data written to database.");
-                        //TODO should we return the user here to make sure its in the database
+                        //should we return the user here to make sure its in the database?
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {

@@ -1,6 +1,7 @@
 package com.example.vetapp;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NavUtils;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -15,6 +16,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -30,6 +32,8 @@ public class VetView extends AppCompatActivity {
 
     private User currentUser;
     private ArrayList<Conversation> conversations;
+
+    private DatabaseReference userRef;
 
     private RecyclerView convoList;
     private RecyclerView.Adapter convoListAdapter;
@@ -73,6 +77,41 @@ public class VetView extends AppCompatActivity {
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 Log.d("Conversations", "Conversation query cancelled.");
             }
+        });
+
+        //this is for the listener that listens for new conversations
+        userRef = FirebaseDatabase.getInstance().getReference("/users/" + currentUser.getUid() + "/conversationList");
+        userRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                //datasnapshot should be the new conversation id
+                String convoId = dataSnapshot.getValue(String.class);
+                if(!currentUser.getConversationList().contains(convoId)){//if we don't already have this conversation in our conversation list
+                    DatabaseReference cRef = FirebaseDatabase.getInstance().getReference("/conversations/" + convoId);
+                    cRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            Conversation convo = dataSnapshot.getValue(Conversation.class);
+                            //add conversation id to user object
+                            currentUser.addConversation(convo.getUid());
+                            //add conversation to conversation list
+                            conversations.add(convo);
+                            //update recycler view
+                            convoListAdapter.notifyDataSetChanged();
+                        }
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) { Log.d("Vet View", "New conversation query cancelled."); }
+                    });
+                }
+            }
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) { }
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) { }
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) { }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) { Log.d("Vet View", "Check for new conversations cancelled."); }
         });
     }
 
@@ -139,8 +178,4 @@ public class VetView extends AppCompatActivity {
         convoListAdapter = new ConversationListAdapter(conversations, me, this);
         convoList.setAdapter(convoListAdapter);
     }
-
-    //TODO add listeners to always listen for messages and conversations updates
-    //  listener on the user's conversation list
-    //  listener on all of the user's conversations << maybe this one is generated in ConversationListAdapter
 }
