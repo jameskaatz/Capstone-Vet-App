@@ -133,7 +133,6 @@ class ConversationListAdapter extends androidx.recyclerview.widget.RecyclerView.
                     bundle.putSerializable("Current User", memberA);
                     bundle.putSerializable("Other User", memberB);
                     bundle.putSerializable("Conversation", conversation);
-                    //TODO maybe pass in parentContext here in order to return to the right place?? idk if itll work
                     intent.putExtras(bundle);
 
                     parentContext.startActivity(intent);

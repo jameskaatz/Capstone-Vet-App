@@ -30,4 +30,5 @@
             android:text="email"
             android:id="@+id/email"/>
     </LinearLayout>
+    <!--TODO [NOT NECESSARY] make it so when clicked it shows "Selected" here and then when you click again (or click some other button) then it goes to the create report activity-->
 </LinearLayout>

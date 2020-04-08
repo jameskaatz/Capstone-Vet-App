@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.example.vetapp.VetView">
+    tools:context="com.example.vetapp.ConversationActivity">
 
     <item
         android:id="@+id/info_button"
@@ -10,12 +10,12 @@
         app:showAsAction="never"/>
 
     <item
-        android:id="@+id/menu_search"
-        android:title="Add Contact"
+        android:id="@+id/view_report"
+        android:title="View Report"
         app:showAsAction="never"/> <!-- Add an icon and change this value to "always" to have the option outside of the triple dot menu-->
 
     <item
-        android:id="@+id/menu_logout"
-        android:title="Logout"
+        android:id="@+id/update_report"
+        android:title="Update Report"
         app:showAsAction="never"/>
 </menu>

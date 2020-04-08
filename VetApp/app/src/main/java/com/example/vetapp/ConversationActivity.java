@@ -3,12 +3,15 @@ package com.example.vetapp;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NavUtils;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -228,11 +231,44 @@ public class ConversationActivity extends AppCompatActivity {
         messageList.setAdapter(messageListAdapter);
     }
 
-    //TODO return to correct vet versus farmer view (There is a way to do this programmatically)
-    //  I think this can be done by making a menu and on the back option just start a new activity of parentContext
-    //  We also have the current user here
-    //  but we want to change the parent view so the regular "back" button on android phones works correctly
-    //these go hand in hand
-    //TODO create menu for the conversation view so we can do the animal stuff
-    //  also show name of other person in conversation in the menu bar
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_conversation, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        //handle presses on the action bar items
+        switch(item.getItemId()) {
+            //this is essentially a "back" button that returns to the parent activity set in the manifest
+            case android.R.id.home:
+                //go to the "home" activity vet view for vets farm view for farms
+                Intent intent = new Intent(this, currentUser.getFarmer() ? FarmView.class : VetView.class);
+
+                //pass user into next activity
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("Current User", currentUser);
+                intent.putExtras(bundle);
+
+                startActivity(intent);
+                return true;
+
+            case R.id.view_report:
+                //TODO go to view symptom report activity here
+                return true;
+
+            case R.id.update_report:
+                //TODO go to update symptom report activitiy here
+                return true;
+
+            case R.id.info_button:
+                //TODO go to info page here
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 }
+
+//TODO make it so it shows the name of the other person in the conversation at the top

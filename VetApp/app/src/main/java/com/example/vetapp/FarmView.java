@@ -116,7 +116,7 @@ public class FarmView extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_vet_view, menu);//TODO create menu for farm view
+        getMenuInflater().inflate(R.menu.menu_farm_view, menu);
         return true;
     }
 
@@ -127,6 +127,10 @@ public class FarmView extends AppCompatActivity {
             //this is essentially a "back" button that returns to the parent activity set in the manifest
             case android.R.id.home:
                 NavUtils.navigateUpFromSameTask(this);
+                return true;
+
+            case R.id.info_button:
+                //TODO go to information page here
                 return true;
 
             //logout option

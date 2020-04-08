@@ -96,6 +96,8 @@ class ContactListAdapter extends androidx.recyclerview.widget.RecyclerView.Adapt
                     String uid = ncRef.getKey();
                     Conversation newConvo = new Conversation(uid, me.getUid(), user.getUid());
 
+                    //TODO change this to go to the create symptom report activity
+                    //  make sure to pass in all the information below and pass it on again when you go from the report page to the conversation page
                     //go to conversation activity with conversation in the bundle
                     Intent intent = new Intent(parentContext, ConversationActivity.class);
 

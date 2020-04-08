@@ -24,7 +24,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.concurrent.CountDownLatch;
 
 public class VetView extends AppCompatActivity {
 
@@ -128,6 +127,10 @@ public class VetView extends AppCompatActivity {
             //this is essentially a "back" button that returns to the parent activity set in the manifest
             case android.R.id.home:
                 NavUtils.navigateUpFromSameTask(this);
+                return true;
+
+            case R.id.info_button:
+                //TODO go to information page here
                 return true;
 
             //logout option
