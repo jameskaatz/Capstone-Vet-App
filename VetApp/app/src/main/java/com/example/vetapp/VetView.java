@@ -28,6 +28,7 @@ import java.util.ArrayList;
 public class VetView extends AppCompatActivity {
 
     private Button createConvoBtn;
+    private Button toCasesBtn;
 
     private User currentUser;
     private ArrayList<Conversation> conversations;
@@ -53,6 +54,14 @@ public class VetView extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 goToNewConversationActivity(currentUser);
+            }
+        });
+
+        toCasesBtn = (Button) findViewById(R.id.button4);
+        toCasesBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                goToCasesActivity(currentUser);
             }
         });
 
@@ -168,6 +177,17 @@ public class VetView extends AppCompatActivity {
         intent.putExtras(bundle);
 
         Log.d("Vet View", "Going into new conversation activity");
+        startActivity(intent);
+    }
+
+    private void goToCasesActivity(User user){
+        Intent intent = new Intent(this, CasesActivity.class);
+
+        //pass user into next activity
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("Current User", currentUser);
+        intent.putExtras(bundle);
+
         startActivity(intent);
     }
 

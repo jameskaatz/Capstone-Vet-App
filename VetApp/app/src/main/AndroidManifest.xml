@@ -9,7 +9,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ConversationActivity"></activity>
+        <activity android:name=".MoreSymp"></activity>
+        <activity android:name=".NewAnimals" />
+        <activity android:name=".CasesActivity" />
+        <activity android:name=".ConversationActivity" />
         <activity android:name=".NewConversationActivity" />
         <activity android:name=".UserSearchActivity" />
         <activity android:name=".AddContactActivity" />

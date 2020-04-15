@@ -28,6 +28,7 @@ import java.util.ArrayList;
 public class FarmView extends AppCompatActivity {
 
     private Button createConvoBtn;
+    private Button toAnimalsBtn;
 
     private User currentUser;
     private ArrayList<Conversation> conversations;
@@ -50,12 +51,19 @@ public class FarmView extends AppCompatActivity {
 
         createConvoBtn = findViewById(R.id.new_message);
         createConvoBtn.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v) {
+                @Override
+                public void onClick(View v) {
                 goToNewConversationActivity(currentUser);
             }
         });
 
+        toAnimalsBtn = (Button) findViewById(R.id.button);
+        toAnimalsBtn.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                goToAnimalViewActivity(currentUser);
+            }
+        });
         final ArrayList<String> conversationIds = currentUser.getConversationList();
         conversations = new ArrayList<Conversation>();
 
@@ -168,6 +176,16 @@ public class FarmView extends AppCompatActivity {
         intent.putExtras(bundle);
 
         Log.d("Farm View", "Going into new conversation activity");
+        startActivity(intent);
+    }
+
+    private void goToAnimalViewActivity(User user){
+        Intent intent = new Intent(this, ViewAnimals.class);
+
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("Current User", user);
+        intent.putExtras(bundle);
+
         startActivity(intent);
     }
 
