@@ -36,7 +36,7 @@ class ContactListAdapter extends androidx.recyclerview.widget.RecyclerView.Adapt
     @NonNull
     @Override
     public ContactListViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.user_list_item, null, false);
+        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.contact_list_item, null, false);
         RecyclerView.LayoutParams lp = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         itemView.setLayoutParams(lp);
 
@@ -62,7 +62,7 @@ class ContactListAdapter extends androidx.recyclerview.widget.RecyclerView.Adapt
             holder.email.setText("Email: Unknown");
         }
         holder.user = contactList.get(position);
-        holder.select.setText("Select");
+        //holder.select.setText("Select");
     }
 
     @Override
