@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -44,6 +45,12 @@ public class FarmView extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_farm_view);
 
+        final globalClass globalClass = (globalClass) getApplicationContext();
+
+        //globalClass.setOpenCase(false);
+        String str = String.valueOf(globalClass.getOpenCase());
+        Log.d("AUTH", str);
+
         //get the current user from the intent
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
@@ -53,7 +60,11 @@ public class FarmView extends AppCompatActivity {
         createConvoBtn.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View v) {
-                goToNewConversationActivity(currentUser);
+                if(globalClass.getOpenCase() != null) {
+                    goToNewConversationActivity(currentUser);
+                }else{
+                    Toast.makeText(FarmView.this,"No available cases, please add animals", Toast.LENGTH_SHORT);
+                }
             }
         });
 
@@ -61,7 +72,8 @@ public class FarmView extends AppCompatActivity {
         toAnimalsBtn.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-                goToAnimalViewActivity(currentUser);
+                    goToAnimalViewActivity(currentUser);
+
             }
         });
         final ArrayList<String> conversationIds = currentUser.getConversationList();

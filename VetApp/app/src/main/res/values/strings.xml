@@ -74,13 +74,15 @@
         <item>Breathing Heavy</item>
     </string-array>
 
-    <string-array name="skinAndWool">
+    <string-array name="animalWool">
         <item>Wool or Hair Loss</item>
         <item>Rough or Dull Hair Coat</item>
+    </string-array>
+
+    <string-array name="animalSkin">
         <item>Blisters or Sores on Skin</item>
         <item>Itching</item>
     </string-array>
-
     <string-array name="animalMovement">
         <item>Normal</item>
         <item>Limping</item>

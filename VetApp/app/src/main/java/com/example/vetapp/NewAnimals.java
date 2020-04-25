@@ -35,6 +35,14 @@ public class NewAnimals extends AppCompatActivity {
         adapterAnimals.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         animalSpinner.setAdapter(adapterAnimals);
 
+        Spinner sexSpinner = (Spinner) findViewById(R.id.setSexSpinner);
+
+        ArrayAdapter<String> adapterSex = new ArrayAdapter<String>(NewAnimals.this,
+                android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.animalSex));
+
+        adapterSex.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        sexSpinner.setAdapter(adapterSex);
+
         moreSympBtn = (Button) findViewById(R.id.button5);
         moreSympBtn.setOnClickListener(new View.OnClickListener() {
             @Override
